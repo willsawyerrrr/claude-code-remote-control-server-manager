@@ -111,6 +111,10 @@ public sealed class TrayApplicationContext : ApplicationContext
                 item.DropDownItems.Add(new ToolStripMenuItem("Stop", null, (_, _) => _manager.StopDirectory(directory)));
                 item.DropDownItems.Add(new ToolStripMenuItem("Copy Join URL", null, (_, _) => CopyJoinUrl(directory)));
                 break;
+            case DirectoryStatus.RunningUntracked:
+                item.DropDownItems.Add(new ToolStripMenuItem("Stop", null, (_, _) => _manager.StopDirectory(directory)));
+                item.DropDownItems.Add(new ToolStripMenuItem("Still running from before this app last started — stop it to get a join link again.") { Enabled = false });
+                break;
         }
 
         if (directory.Status == DirectoryStatus.Error && directory.ErrorMessage is { } errorMessage)
@@ -130,6 +134,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         DirectoryStatus.Connecting => "Connecting...",
         DirectoryStatus.Ready => "Ready",
         DirectoryStatus.Error => "Error",
+        DirectoryStatus.RunningUntracked => "Running",
         _ => status.ToString(),
     };
 

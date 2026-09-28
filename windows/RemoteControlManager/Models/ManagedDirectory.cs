@@ -32,4 +32,12 @@ public sealed class ManagedDirectory
 
     /// <summary>Error message set when <see cref="Status"/> is <see cref="DirectoryStatus.Error"/>.</summary>
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// Process id of the directory's <c>cmd</c>/<c>wsl</c> child, while a session this instance
+    /// started is running, or while <see cref="Status"/> is
+    /// <see cref="DirectoryStatus.RunningUntracked"/>. Persisted so the next launch can detect a
+    /// server still running from before this app last quit.
+    /// </summary>
+    public int? Pid { get; set; }
 }

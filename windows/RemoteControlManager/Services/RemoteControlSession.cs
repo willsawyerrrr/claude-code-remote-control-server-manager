@@ -34,6 +34,9 @@ public sealed class RemoteControlSession : IDisposable
     /// <summary>Raised when the process exits, for any reason.</summary>
     public event Action? Exited;
 
+    /// <summary>The launched process's id, once <see cref="Start"/> has been called.</summary>
+    public int? ProcessId => _process?.Id;
+
     /// <summary>
     /// Starts <c>claude remote-control</c> with its working directory set to the target
     /// directory. Runs headless: stdin is closed immediately, and stdout/stderr are read
