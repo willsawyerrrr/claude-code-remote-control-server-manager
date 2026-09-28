@@ -32,7 +32,10 @@ public sealed class DirectoryManager : IDisposable
     /// <summary>Raised whenever the directory list or any directory's status changes.</summary>
     public event Action? Changed;
 
-    /// <summary>Adds a directory if it isn't already present. Returns false if it was a duplicate.</summary>
+    /// <summary>
+    /// Adds a directory if it isn't already present and starts its server. Returns false if it
+    /// was a duplicate.
+    /// </summary>
     public bool AddDirectory(string path)
     {
         if (Directories.Any(d => string.Equals(d.Path, path, StringComparison.OrdinalIgnoreCase)))
@@ -40,9 +43,10 @@ public sealed class DirectoryManager : IDisposable
             return false;
         }
 
-        Directories.Add(new ManagedDirectory { Path = path });
+        var directory = new ManagedDirectory { Path = path };
+        Directories.Add(directory);
         Persist();
-        Changed?.Invoke();
+        StartDirectory(directory);
         return true;
     }
 
@@ -130,13 +134,10 @@ public sealed class DirectoryManager : IDisposable
             session.Dispose();
         }
 
-        if (directory.Status == DirectoryStatus.Connecting)
-        {
-            // Exited before ever reporting a join URL or a known error (e.g. crashed).
-            directory.Status = DirectoryStatus.Error;
-            directory.ErrorMessage = "claude remote-control exited unexpectedly.";
-        }
-        else if (directory.Status != DirectoryStatus.Error)
+        // A session that exited without ever becoming ready already went through OnFailed
+        // (RemoteControlSession guarantees Failed fires before Exited in that case), so only a
+        // clean stop or a post-ready crash reach here with a non-Error status.
+        if (directory.Status != DirectoryStatus.Error)
         {
             directory.Status = DirectoryStatus.Stopped;
             directory.JoinUrl = null;

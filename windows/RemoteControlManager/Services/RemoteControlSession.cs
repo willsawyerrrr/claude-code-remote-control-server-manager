@@ -13,11 +13,11 @@ public sealed class RemoteControlSession : IDisposable
     private static readonly Regex JoinUrlPattern =
         new(@"https://claude\.ai/code\?environment=\S+", RegexOptions.Compiled);
 
-    private const string WorkspaceNotTrustedPrefix = "Error: Workspace not trusted";
-
     private readonly string _directoryPath;
     private readonly string _name;
     private Process? _process;
+    private string? _lastStderrLine;
+    private bool _becameReady;
 
     public RemoteControlSession(string directoryPath, string name)
     {
@@ -41,36 +41,79 @@ public sealed class RemoteControlSession : IDisposable
     /// </summary>
     public void Start()
     {
-        var startInfo = new ProcessStartInfo
-        {
-            // Route through cmd.exe rather than invoking "claude" directly: npm-installed
-            // global CLIs on Windows are typically a .cmd/.bat shim, and Process.Start does not
-            // probe PATHEXT the way cmd.exe does, so a direct launch can fail to resolve it.
-            FileName = "cmd.exe",
-            WorkingDirectory = _directoryPath,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-        };
-        startInfo.ArgumentList.Add("/c");
-        startInfo.ArgumentList.Add("claude");
-        startInfo.ArgumentList.Add("remote-control");
-        startInfo.ArgumentList.Add("--name");
-        startInfo.ArgumentList.Add(_name);
-        startInfo.ArgumentList.Add("--no-create-session-in-dir");
+        var startInfo = BuildStartInfo(ClaudeCommand.Current);
 
         var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
         process.OutputDataReceived += OnOutputDataReceived;
         process.ErrorDataReceived += OnErrorDataReceived;
-        process.Exited += (_, _) => Exited?.Invoke();
+        process.Exited += (_, _) =>
+        {
+            if (!_becameReady)
+            {
+                var message = _lastStderrLine
+                    ?? $"claude remote-control exited unexpectedly (exit code {process.ExitCode}).";
+                Failed?.Invoke(message);
+            }
+
+            Exited?.Invoke();
+        };
         _process = process;
 
         process.Start();
         process.StandardInput.Close();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
+    }
+
+    /// <summary>
+    /// Builds the launch command for <paramref name="strategy"/>: either <c>claude</c> directly
+    /// on the Windows PATH (routed through <c>cmd.exe</c>, since an npm-installed global CLI is
+    /// typically a <c>.cmd</c>/<c>.bat</c> shim that <see cref="Process.Start()"/> won't resolve
+    /// on its own — it doesn't probe PATHEXT the way cmd.exe does), or, when Claude Code is only
+    /// installed inside WSL, <c>wsl.exe --cd &lt;linux path&gt; -- &lt;claude&gt; ...</c>.
+    /// </summary>
+    private ProcessStartInfo BuildStartInfo(ClaudeCommand.Strategy strategy)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        };
+
+        if (!strategy.UseWsl)
+        {
+            startInfo.FileName = "cmd.exe";
+            startInfo.WorkingDirectory = _directoryPath;
+            startInfo.ArgumentList.Add("/c");
+            startInfo.ArgumentList.Add("claude");
+            startInfo.ArgumentList.Add("remote-control");
+            startInfo.ArgumentList.Add("--name");
+            startInfo.ArgumentList.Add(_name);
+            startInfo.ArgumentList.Add("--no-create-session-in-dir");
+            return startInfo;
+        }
+
+        var (linuxPath, distro) = WslPath.Translate(_directoryPath);
+
+        startInfo.FileName = "wsl.exe";
+        if (distro is not null)
+        {
+            startInfo.ArgumentList.Add("-d");
+            startInfo.ArgumentList.Add(distro);
+        }
+
+        startInfo.ArgumentList.Add("--cd");
+        startInfo.ArgumentList.Add(linuxPath);
+        startInfo.ArgumentList.Add("--");
+        startInfo.ArgumentList.Add(strategy.WslClaudePath!);
+        startInfo.ArgumentList.Add("remote-control");
+        startInfo.ArgumentList.Add("--name");
+        startInfo.ArgumentList.Add(_name);
+        startInfo.ArgumentList.Add("--no-create-session-in-dir");
+        return startInfo;
     }
 
     private void OnOutputDataReceived(object? sender, DataReceivedEventArgs e)
@@ -84,6 +127,7 @@ public sealed class RemoteControlSession : IDisposable
         var match = JoinUrlPattern.Match(line);
         if (match.Success)
         {
+            _becameReady = true;
             Ready?.Invoke(match.Value);
         }
     }
@@ -96,9 +140,9 @@ public sealed class RemoteControlSession : IDisposable
         }
 
         var line = AnsiStripper.Strip(e.Data);
-        if (line.StartsWith(WorkspaceNotTrustedPrefix, StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(line))
         {
-            Failed?.Invoke(line);
+            _lastStderrLine = line;
         }
     }
 
