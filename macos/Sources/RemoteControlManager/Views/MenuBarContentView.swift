@@ -26,7 +26,7 @@ struct MenuBarContentView: View {
                         }
                     }
                 }
-                .frame(maxHeight: 320)
+                .frame(maxHeight: 480)
             }
 
             Divider()
