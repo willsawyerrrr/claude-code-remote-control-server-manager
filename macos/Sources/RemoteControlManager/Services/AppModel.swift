@@ -8,9 +8,12 @@ import Foundation
 final class AppModel: ObservableObject {
     @Published private(set) var directories: [ManagedDirectory] = []
 
+    private var statusObservers: [UUID: AnyCancellable] = [:]
+
     init() {
         directories = DirectoryStore.load().map(ManagedDirectory.init(record:))
         for directory in directories {
+            observe(directory)
             directory.start()
         }
     }
@@ -33,6 +36,7 @@ final class AppModel: ObservableObject {
 
         let directory = ManagedDirectory(path: standardizedURL)
         directories.append(directory)
+        observe(directory)
         persist()
         directory.start()
     }
@@ -41,14 +45,14 @@ final class AppModel: ObservableObject {
     func remove(_ directory: ManagedDirectory) {
         directory.stop()
         directories.removeAll { $0.id == directory.id }
+        statusObservers[directory.id] = nil
         persist()
     }
 
-    /// Sends `SIGTERM` to every running server. Used when the app is quitting.
-    func stopAll() {
-        for directory in directories {
-            directory.stop()
-        }
+    /// Persists whenever this directory's server status or pid changes.
+    private func observe(_ directory: ManagedDirectory) {
+        statusObservers[directory.id] = Publishers.CombineLatest(directory.$status, directory.$pid)
+            .sink { [weak self] _ in self?.persist() }
     }
 
     private func persist() {

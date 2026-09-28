@@ -97,6 +97,10 @@ struct DirectoryRowView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.red)
                 .help("Error")
+        case .runningUntracked:
+            Image(systemName: "questionmark.circle.fill")
+                .foregroundStyle(.orange)
+                .help("Running from a previous launch — its join URL isn't available")
         }
     }
 }

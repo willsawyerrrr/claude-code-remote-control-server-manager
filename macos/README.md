@@ -14,7 +14,7 @@ This is a Swift Package Manager executable target, not an `.xcodeproj`:
 - `Package.swift` — package manifest.
 - `Sources/RemoteControlManager/` — app source.
   - `RemoteControlManagerApp.swift` — `MenuBarExtra` scene and app delegate
-    (accessory activation policy, clean shutdown of child processes).
+    (accessory activation policy).
   - `Models/` — `SessionStatus`, `DirectoryRecord`, `ManagedDirectory`.
   - `Services/` — `RemoteControlProcess` (spawns and parses
     `claude remote-control`), `DirectoryStore` (persistence), `AppModel`
@@ -30,7 +30,12 @@ This is a Swift Package Manager executable target, not an `.xcodeproj`:
 
 - The directory list persists across launches at
   `~/Library/Application Support/RemoteControlManager/directories.json`.
-  Every launch starts a server for each directory in that list.
+  Quitting the app leaves any running servers running, so they keep fronting
+  sessions someone might be connected to. Every launch starts a server for
+  each directory in that list, or, for one detected as still running from
+  before this app last quit, marks it running rather than starting a
+  competing duplicate — it can then only be stopped, not connected to, since
+  this launch never captured its join URL.
 - A directory must already have its Claude Code workspace trust dialog
   accepted (`claude` run there once, interactively) before its server can
   start; otherwise the directory's status surfaces the trust error verbatim.

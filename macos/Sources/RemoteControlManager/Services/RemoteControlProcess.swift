@@ -32,6 +32,11 @@ final class RemoteControlProcess {
     private var userRequestedStop = false
     private(set) var isRunning = false
 
+    /// The launched process's id, once `start()` has succeeded.
+    var pid: pid_t? {
+        isRunning ? process.processIdentifier : nil
+    }
+
     init(directoryURL: URL, name: String, onStatusChange: @escaping StatusHandler) {
         self.directoryURL = directoryURL
         self.name = name
