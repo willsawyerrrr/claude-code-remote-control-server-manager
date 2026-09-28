@@ -159,8 +159,9 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     private void OnQuit()
     {
-        // Terminate every running child process before exiting.
-        _manager.StopAll();
+        // Running servers are intentionally left running: quitting the manager (including for a
+        // reinstall) should not interrupt a session someone might be connected to. See
+        // DirectoryManager.Dispose for what that means on the next launch.
         ExitThread();
     }
 
