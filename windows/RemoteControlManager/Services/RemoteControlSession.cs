@@ -13,12 +13,15 @@ public sealed class RemoteControlSession : IDisposable
     private static readonly Regex JoinUrlPattern =
         new(@"https://claude\.ai/code\?environment=\S+", RegexOptions.Compiled);
 
+    private const string WorkspaceNotTrustedMarker = "Workspace not trusted";
+
     private readonly string _directoryPath;
     private readonly string _name;
     private Process? _process;
     private string? _lastStderrLine;
     private bool _becameReady;
     private bool _userRequestedStop;
+    private bool _failed;
 
     public RemoteControlSession(string directoryPath, string name)
     {
@@ -52,7 +55,7 @@ public sealed class RemoteControlSession : IDisposable
         process.ErrorDataReceived += OnErrorDataReceived;
         process.Exited += (_, _) =>
         {
-            if (!_becameReady && !_userRequestedStop)
+            if (!_becameReady && !_userRequestedStop && !_failed)
             {
                 var message = _lastStderrLine
                     ?? $"claude remote-control exited unexpectedly (exit code {process.ExitCode}).";
@@ -128,6 +131,8 @@ public sealed class RemoteControlSession : IDisposable
         }
 
         var line = AnsiStripper.Strip(e.Data);
+        FailOnWorkspaceNotTrusted(line);
+
         var match = JoinUrlPattern.Match(line);
         if (match.Success)
         {
@@ -148,6 +153,23 @@ public sealed class RemoteControlSession : IDisposable
         {
             _lastStderrLine = line;
         }
+
+        FailOnWorkspaceNotTrusted(line);
+    }
+
+    /// <summary>
+    /// Reports the exact line as the failure the moment the trust error appears on either
+    /// stream, rather than waiting for exit and guessing from whatever line stderr saw last.
+    /// </summary>
+    private void FailOnWorkspaceNotTrusted(string line)
+    {
+        if (_failed || _becameReady || !line.Contains(WorkspaceNotTrustedMarker, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        _failed = true;
+        Failed?.Invoke(line);
     }
 
     /// <summary>
