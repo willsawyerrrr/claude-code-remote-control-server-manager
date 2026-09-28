@@ -101,15 +101,6 @@ public sealed class DirectoryManager : IDisposable
         }
     }
 
-    /// <summary>Stops every running server. Called before the app quits.</summary>
-    public void StopAll()
-    {
-        foreach (var session in _sessions.Values)
-        {
-            session.Stop();
-        }
-    }
-
     private void OnReady(ManagedDirectory directory, string url)
     {
         directory.Status = DirectoryStatus.Ready;
@@ -151,9 +142,18 @@ public sealed class DirectoryManager : IDisposable
         _store.Save(Directories.Select(d => d.Path));
     }
 
+    /// <summary>
+    /// Releases this manager's own tracking of running sessions without stopping them: the
+    /// servers they front are left running so they survive the app quitting or being reinstalled.
+    /// The next launch has no way to tell they're still running — <see cref="Directories"/> loads
+    /// from disk as <see cref="DirectoryStatus.Stopped"/> regardless — so clicking Start again on
+    /// one of them starts an additional, independent session rather than reattaching to the one
+    /// still running; <c>claude remote-control</c>'s own <c>--continue</c> only picks up a
+    /// session whose process has already exited, not one still live under a different manager
+    /// instance.
+    /// </summary>
     public void Dispose()
     {
-        StopAll();
         foreach (var session in _sessions.Values)
         {
             session.Dispose();
