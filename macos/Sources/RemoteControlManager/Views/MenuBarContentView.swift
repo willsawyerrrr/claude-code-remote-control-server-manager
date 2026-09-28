@@ -12,22 +12,27 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            if model.directories.isEmpty {
-                Text("No directories added yet.")
-                    .foregroundStyle(.secondary)
-                    .font(.callout)
-                    .padding(12)
-            } else {
-                ScrollView {
-                    VStack(spacing: 0) {
-                        ForEach(model.directories) { directory in
-                            DirectoryRowView(directory: directory)
-                            Divider()
+            Group {
+                if model.directories.isEmpty {
+                    Text("No directories added yet.")
+                        .foregroundStyle(.secondary)
+                        .font(.callout)
+                        .padding(12)
+                } else {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ForEach(model.directories) { directory in
+                                DirectoryRowView(directory: directory)
+                                Divider()
+                            }
                         }
                     }
                 }
-                .frame(maxHeight: 480)
             }
+            // Fixed, not maxHeight, and constant across both branches above: MenuBarExtra's
+            // `.window` style doesn't reliably re-measure the popover as this content's
+            // height changes while it's open.
+            .frame(height: 480)
 
             Divider()
 
