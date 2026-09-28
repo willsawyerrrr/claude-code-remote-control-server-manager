@@ -1,0 +1,15 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Xcode / Swift
+macos/**/*.xcodeproj/xcuserdata/
+macos/**/*.xcworkspace/xcuserdata/
+macos/**/.build/
+macos/**/DerivedData/
+macos/**/.swiftpm/
+
+# .NET / Visual Studio
+windows/**/bin/
+windows/**/obj/
+windows/**/.vs/
