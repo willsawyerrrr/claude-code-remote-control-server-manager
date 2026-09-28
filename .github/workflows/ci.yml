@@ -45,3 +45,33 @@ jobs:
       - name: Build
         run: swift build
         working-directory: macos
+
+  # A single check to require in branch protection, so a PR that only touches
+  # one app isn't blocked on a job that never ran for it: windows/macos are
+  # path-gated (see `changes` above), and a skipped required check counts as
+  # passing on its own — this job turns that into a real result by failing
+  # explicitly if either job that did run didn't succeed.
+  ci-status:
+    name: CI Status
+    if: ${{ always() }}
+    needs: [changes, windows, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all required jobs succeeded
+        run: |
+          require_success() {
+            if [ "$2" != "success" ]; then
+              echo "::error::$1 did not succeed (got '$2')."
+              exit 1
+            fi
+          }
+          require_success_or_skipped() {
+            if [ "$2" != "success" ] && [ "$2" != "skipped" ]; then
+              echo "::error::$1 did not succeed (got '$2')."
+              exit 1
+            fi
+          }
+          require_success changes "${{ needs.changes.result }}"
+          require_success_or_skipped windows "${{ needs.windows.result }}"
+          require_success_or_skipped macos "${{ needs.macos.result }}"
+          echo "all required jobs succeeded"
