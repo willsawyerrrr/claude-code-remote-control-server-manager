@@ -5,8 +5,10 @@ import Foundation
 final class RemoteControlProcess {
     typealias StatusHandler = (SessionStatus) -> Void
 
+    // Matches ANSI CSI sequences: ESC '[' followed by parameter bytes (0x30-0x3F), intermediate
+    // bytes (0x20-0x2F), and a final byte (0x40-0x7E).
     private static let ansiEscapePattern = try! NSRegularExpression(
-        pattern: "\u{1B}\\[[0-9;]*[A-Za-z]"
+        pattern: "\u{1B}\\[[0-?]*[ -/]*[@-~]"
     )
     private static let joinURLPattern = try! NSRegularExpression(
         pattern: "https://claude\\.ai/code\\?environment=[A-Za-z0-9_-]+"
