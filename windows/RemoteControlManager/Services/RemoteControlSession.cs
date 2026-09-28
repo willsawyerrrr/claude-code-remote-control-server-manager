@@ -18,6 +18,7 @@ public sealed class RemoteControlSession : IDisposable
     private Process? _process;
     private string? _lastStderrLine;
     private bool _becameReady;
+    private bool _userRequestedStop;
 
     public RemoteControlSession(string directoryPath, string name)
     {
@@ -51,7 +52,7 @@ public sealed class RemoteControlSession : IDisposable
         process.ErrorDataReceived += OnErrorDataReceived;
         process.Exited += (_, _) =>
         {
-            if (!_becameReady)
+            if (!_becameReady && !_userRequestedStop)
             {
                 var message = _lastStderrLine
                     ?? $"claude remote-control exited unexpectedly (exit code {process.ExitCode}).";
@@ -160,6 +161,10 @@ public sealed class RemoteControlSession : IDisposable
         {
             return;
         }
+
+        // Marks this as a deliberate stop so the exit handler reports it as such, rather than as
+        // a failure just because it happened before the process ever reported ready.
+        _userRequestedStop = true;
 
         try
         {
