@@ -21,7 +21,7 @@ struct MenuBarContentView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 0) {
-                            ForEach(model.directories) { directory in
+                            ForEach(sortedDirectories) { directory in
                                 DirectoryRowView(directory: directory)
                                 Divider()
                             }
@@ -43,6 +43,10 @@ struct MenuBarContentView: View {
             .padding(12)
         }
         .frame(width: 340)
+    }
+
+    private var sortedDirectories: [ManagedDirectory] {
+        model.directories.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     private var header: some View {
