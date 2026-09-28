@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using RemoteControlManager.Models;
 using RemoteControlManager.Services;
@@ -20,6 +21,13 @@ public sealed class TrayApplicationContext : ApplicationContext
     // DirectoryManager.Changed callbacks (which can arrive on a background thread) back onto
     // the UI thread via Invoke/BeginInvoke.
     private readonly Control _uiThread = new();
+
+    // NotifyIcon's own right-click path calls this internally before showing its context menu;
+    // showing the menu manually (below, for left-click) has to do the same or the menu never
+    // becomes the foreground window, so Windows never detects a click elsewhere as "lost focus"
+    // and the menu lingers open until it's clicked on directly.
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
 
     public TrayApplicationContext()
     {
@@ -43,6 +51,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         {
             if (e.Button == MouseButtons.Left)
             {
+                SetForegroundWindow(_uiThread.Handle);
                 _notifyIcon.ContextMenuStrip!.Show(Cursor.Position);
             }
         };
