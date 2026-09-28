@@ -73,7 +73,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
         else
         {
-            foreach (var directory in _manager.Directories.ToList())
+            foreach (var directory in _manager.Directories.OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase))
             {
                 menu.Items.Add(BuildDirectoryMenuItem(directory));
             }
