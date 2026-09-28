@@ -132,9 +132,6 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
 
         Clipboard.SetText(directory.JoinUrl);
-        _notifyIcon.BalloonTipTitle = directory.Name;
-        _notifyIcon.BalloonTipText = "Join URL copied to clipboard.";
-        _notifyIcon.ShowBalloonTip(3000);
     }
 
     private void OnAddDirectory()
