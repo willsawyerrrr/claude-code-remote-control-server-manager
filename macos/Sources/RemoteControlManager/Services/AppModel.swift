@@ -28,8 +28,10 @@ final class AppModel: ObservableObject {
             return
         }
 
-        directories.append(ManagedDirectory(path: standardizedURL))
+        let directory = ManagedDirectory(path: standardizedURL)
+        directories.append(directory)
         persist()
+        directory.start()
     }
 
     /// Stops the directory's server, if running, and removes it from the list.
