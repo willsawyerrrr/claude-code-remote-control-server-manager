@@ -16,4 +16,10 @@ public enum DirectoryStatus
 
     /// <summary>The server failed to start or exited unexpectedly.</summary>
     Error,
+
+    /// <summary>
+    /// Detected as still running from before this app last started — its process is alive, but
+    /// this instance never captured its join URL, so it can only be stopped, not connected to.
+    /// </summary>
+    RunningUntracked,
 }
