@@ -10,6 +10,9 @@ final class AppModel: ObservableObject {
 
     init() {
         directories = DirectoryStore.load().map(ManagedDirectory.init(record:))
+        for directory in directories {
+            directory.start()
+        }
     }
 
     /// Presents a directory picker and adds the chosen directory, if any and not already added.

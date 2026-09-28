@@ -30,7 +30,7 @@ This is a Swift Package Manager executable target, not an `.xcodeproj`:
 
 - The directory list persists across launches at
   `~/Library/Application Support/RemoteControlManager/directories.json`.
-  Running state does not persist — servers are never auto-started on launch.
+  Every launch starts a server for each directory in that list.
 - A directory must already have its Claude Code workspace trust dialog
   accepted (`claude` run there once, interactively) before its server can
   start; otherwise the directory's status surfaces the trust error verbatim.
