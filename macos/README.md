@@ -33,9 +33,9 @@ This is a Swift Package Manager executable target, not an `.xcodeproj`:
   Quitting the app leaves any running servers running, so they keep fronting
   sessions someone might be connected to. Every launch starts a server for
   each directory in that list, or, for one detected as still running from
-  before this app last quit, marks it running rather than starting a
-  competing duplicate — it can then only be stopped, not connected to, since
-  this launch never captured its join URL.
+  before this app last quit, reuses the join URL it reported (persisted with
+  the directory) rather than starting a competing duplicate. If it hadn't
+  reported one yet, it's marked running and can only be stopped.
 - A directory must already have its Claude Code workspace trust dialog
   accepted (`claude` run there once, interactively) before its server can
   start; otherwise the directory's status surfaces the trust error verbatim.
