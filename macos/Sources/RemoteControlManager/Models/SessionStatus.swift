@@ -7,9 +7,15 @@ enum SessionStatus: Equatable {
     case ready(joinURL: String)
     case error(message: String)
 
-    /// Detected as still running from before this app last quit: its process is alive, but this
-    /// launch never captured its join URL, so it can only be stopped, not connected to.
+    /// Detected as still running from before this app last quit, but it hadn't yet reported a
+    /// join URL by then, so it can only be stopped, not connected to.
     case runningUntracked
+
+    /// The join URL, once the server has reported one.
+    var joinURL: String? {
+        if case .ready(let joinURL) = self { return joinURL }
+        return nil
+    }
 
     /// Whether a child process is currently expected to be alive for this status.
     var isRunning: Bool {

@@ -31,8 +31,11 @@ or open the `windows/RemoteControlManager/` folder directly in Visual Studio
 - Each directory is a submenu showing its status (Stopped / Connecting /
   Ready / Error) with **Start**/**Stop**, **Copy Join URL** (once Ready), and
   **Remove**.
-- **Quit** stops every running server before exiting.
+- **Quit** leaves running servers running.
 
 The directory list persists across restarts at
-`%APPDATA%\RemoteControlManager\directories.json`; servers are never
-auto-started on launch.
+`%APPDATA%\RemoteControlManager\directories.json`, along with each running
+server's process id and join URL. A server still running on the next launch
+keeps its join URL and is not started again; if it hadn't reported one yet,
+it's marked running and can only be stopped. Servers are never auto-started
+on launch.

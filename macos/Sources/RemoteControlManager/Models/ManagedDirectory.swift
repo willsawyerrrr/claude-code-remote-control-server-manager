@@ -18,33 +18,39 @@ final class ManagedDirectory: ObservableObject, Identifiable {
 
     private var process: RemoteControlProcess?
 
+    /// The join URL restored from a record, reused if that record's server is still running.
+    private let restoredJoinURL: String?
+
     var name: String { path.lastPathComponent }
 
     init(id: UUID = UUID(), path: URL) {
         self.id = id
         self.path = path
+        self.restoredJoinURL = nil
     }
 
     init(record: DirectoryRecord) {
         self.id = record.id
         self.path = URL(fileURLWithPath: record.path, isDirectory: true)
         self.pid = record.pid
+        self.restoredJoinURL = record.joinURL
     }
 
     /// The persistable form of this directory.
     var record: DirectoryRecord {
-        DirectoryRecord(id: id, path: path.path, pid: pid)
+        DirectoryRecord(id: id, path: path.path, pid: pid, joinURL: status.joinURL)
     }
 
     /// Starts `claude remote-control` for this directory, unless it's already running — whether
     /// as a process this instance launched, or one detected as still running from before this
-    /// app last quit (see `isOrphanStillRunning`), in which case it's surfaced as
-    /// `.runningUntracked` rather than starting a competing duplicate.
+    /// app last quit (see `isOrphanStillRunning`). A still-running server keeps the join URL it
+    /// reported before the quit, so it comes back as `.ready`; if it hadn't reported one yet,
+    /// it's surfaced as `.runningUntracked`. Either way no competing duplicate is started.
     func start() {
         guard !status.isRunning else { return }
 
         if let pid, Self.isOrphanStillRunning(pid: pid) {
-            status = .runningUntracked
+            status = restoredJoinURL.map { .ready(joinURL: $0) } ?? .runningUntracked
             return
         }
 
@@ -70,7 +76,7 @@ final class ManagedDirectory: ObservableObject, Identifiable {
             return
         }
 
-        if case .runningUntracked = status, let pid {
+        if status.isRunning, let pid {
             kill(pid, SIGTERM)
             status = .stopped
             self.pid = nil

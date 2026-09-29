@@ -18,8 +18,8 @@ public enum DirectoryStatus
     Error,
 
     /// <summary>
-    /// Detected as still running from before this app last started — its process is alive, but
-    /// this instance never captured its join URL, so it can only be stopped, not connected to.
+    /// Detected as still running from before this app last started, but it hadn't yet reported
+    /// a join URL by then, so it can only be stopped, not connected to.
     /// </summary>
     RunningUntracked,
 }

@@ -33,7 +33,10 @@ public sealed class DirectoryManager : IDisposable
     /// <see cref="Dispose"/>), so it's surfaced as <see cref="DirectoryStatus.RunningUntracked"/>
     /// rather than <see cref="DirectoryStatus.Stopped"/>, and its pid is kept so it can still be
     /// stopped — the alternative, starting a new session for the same directory, is exactly the
-    /// orphaned-duplicate outcome this is meant to avoid.
+    /// orphaned-duplicate outcome this is meant to avoid. The join URL persisted with the record
+    /// stays valid for as long as that process lives, so it is restored as
+    /// <see cref="DirectoryStatus.Ready"/>; a server that hadn't reported one yet is surfaced as
+    /// <see cref="DirectoryStatus.RunningUntracked"/>.
     /// </summary>
     private static ManagedDirectory LoadDirectory(DirectoryRecord record)
     {
@@ -42,7 +45,8 @@ public sealed class DirectoryManager : IDisposable
         if (record.Pid is int pid && IsLikelyOrphanedSession(pid))
         {
             directory.Pid = pid;
-            directory.Status = DirectoryStatus.RunningUntracked;
+            directory.JoinUrl = record.JoinUrl;
+            directory.Status = record.JoinUrl is null ? DirectoryStatus.RunningUntracked : DirectoryStatus.Ready;
         }
 
         return directory;
@@ -98,11 +102,11 @@ public sealed class DirectoryManager : IDisposable
     /// <summary>
     /// Starts the server for <paramref name="directory"/>, unless it's already running — whether
     /// as a session this instance is managing, or one detected as still running from before this
-    /// app last started (<see cref="DirectoryStatus.RunningUntracked"/>; stop it first).
+    /// app last started (see <see cref="IsDetachedRunning"/>; stop it first).
     /// </summary>
     public void StartDirectory(ManagedDirectory directory)
     {
-        if (_sessions.ContainsKey(directory.Path) || directory.Status == DirectoryStatus.RunningUntracked)
+        if (_sessions.ContainsKey(directory.Path) || IsDetachedRunning(directory))
         {
             return;
         }
@@ -147,15 +151,24 @@ public sealed class DirectoryManager : IDisposable
             return;
         }
 
-        if (directory.Status == DirectoryStatus.RunningUntracked && directory.Pid is int pid)
+        if (IsDetachedRunning(directory) && directory.Pid is int pid)
         {
             KillOrphan(pid);
             directory.Status = DirectoryStatus.Stopped;
+            directory.JoinUrl = null;
             directory.Pid = null;
             Persist();
             Changed?.Invoke();
         }
     }
+
+    /// <summary>
+    /// Whether <paramref name="directory"/> is running from an earlier launch, with no session
+    /// this instance is managing.
+    /// </summary>
+    private bool IsDetachedRunning(ManagedDirectory directory) =>
+        !_sessions.ContainsKey(directory.Path)
+        && directory.Status is DirectoryStatus.Ready or DirectoryStatus.RunningUntracked;
 
     private static void KillOrphan(int pid)
     {
@@ -178,6 +191,7 @@ public sealed class DirectoryManager : IDisposable
         directory.Status = DirectoryStatus.Ready;
         directory.JoinUrl = url;
         directory.ErrorMessage = null;
+        Persist();
         Changed?.Invoke();
     }
 
@@ -213,7 +227,7 @@ public sealed class DirectoryManager : IDisposable
 
     private void Persist()
     {
-        _store.Save(Directories.Select(d => new DirectoryRecord { Path = d.Path, Pid = d.Pid }));
+        _store.Save(Directories.Select(d => new DirectoryRecord { Path = d.Path, Pid = d.Pid, JoinUrl = d.JoinUrl }));
     }
 
     /// <summary>
