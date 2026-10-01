@@ -43,10 +43,16 @@ final class RemoteControlProcess {
         self.onStatusChange = onStatusChange
     }
 
-    /// Launches `claude remote-control` with `directoryURL` as its working directory.
+    /// Launches `claude remote-control` with `directoryURL` as its working directory, through the
+    /// user's login shell so `claude` resolves on the `PATH` their shell configures — GUI apps
+    /// inherit only a minimal one.
     func start() {
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = ["claude", "remote-control", "--name", name, "--no-create-session-in-dir"]
+        let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/zsh"
+        process.executableURL = URL(fileURLWithPath: shell)
+        process.arguments = [
+            "-l", "-i", "-c", "exec claude \"$@\"", "claude",
+            "remote-control", "--name", name, "--no-create-session-in-dir",
+        ]
         process.currentDirectoryURL = directoryURL
 
         process.standardInput = stdinPipe
