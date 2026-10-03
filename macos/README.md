@@ -13,9 +13,9 @@ Targets macOS 13+.
 brew install willsawyerrrr/tap/tether
 ```
 
-This builds the app from source (Xcode required) and links `tether` (the app)
-and `tetherctl` onto your `PATH`. Keep the app running in the background
-across logins with `brew services start tether`.
+This builds the app from source (Xcode required) and puts `tether` (launches
+the app) and `tetherctl` on your `PATH`. Keep the app running in the
+background across logins with `brew services start tether`.
 
 ## Structure
 
