@@ -40,8 +40,10 @@ lifecycle end to end.
 
 ## Releases
 
-Publishing a GitHub release (`gh release create vX.Y.Z`) triggers
-`.github/workflows/homebrew.yml`, which commits the new tarball URL and
-sha256 to `willsawyerrrr/homebrew-tap` so `brew upgrade tether` picks it up
-immediately. It pushes with the `TAP_DEPLOY_KEY` secret, a write deploy key
-scoped to that repo.
+Every merge to `main` publishes a GitHub release (`.github/workflows/release.yml`):
+a `feat` commit bumps the minor version, anything else the patch version. The
+release then calls `.github/workflows/homebrew.yml`, which commits the new
+tarball URL and sha256 to `willsawyerrrr/homebrew-tap` so `brew upgrade tether`
+picks it up immediately. It pushes with the `TAP_DEPLOY_KEY` secret, a write
+deploy key scoped to that repo. Releases created by hand (`gh release create`)
+trigger the same Homebrew update.
