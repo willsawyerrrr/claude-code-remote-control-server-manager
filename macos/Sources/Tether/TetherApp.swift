@@ -22,8 +22,12 @@ struct TetherApp: App {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
+    private lazy var controlServer = ControlServer { [model] request in
+        await model.handle(request)
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApplication.shared.setActivationPolicy(.accessory)
+        controlServer.start()
     }
 }

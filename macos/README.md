@@ -9,22 +9,40 @@ Targets macOS 13+.
 
 ## Structure
 
-This is a Swift Package Manager executable target, not an `.xcodeproj`:
+This is a Swift Package Manager package, not an `.xcodeproj`:
 
 - `Package.swift` — package manifest.
+- `Sources/TetherIPC/` — the control-socket protocol and POSIX helpers shared
+  by the app and the CLI.
+- `Sources/TetherCLI/` — `tetherctl`, the command-line client.
 - `Sources/Tether/` — app source.
   - `TetherApp.swift` — `MenuBarExtra` scene and app delegate
     (accessory activation policy).
   - `Models/` — `SessionStatus`, `DirectoryRecord`, `ManagedDirectory`.
   - `Services/` — `RemoteControlProcess` (spawns and parses
     `claude remote-control`), `DirectoryStore` (persistence), `AppModel`
-    (app-wide state).
+    (app-wide state), `ControlServer` (the control socket `tetherctl` talks to).
   - `Views/` — `MenuBarContentView`, `DirectoryRowView`.
 
 ## Opening and running
 
 - In Xcode: `open Package.swift`, then run the `Tether` scheme.
 - From the command line: `swift run` (from this directory).
+
+## Command line
+
+`tetherctl` controls the running app over a Unix domain socket at
+`~/Library/Application Support/Tether/tether.sock` (owner-only):
+
+```
+tetherctl add [directory]     # add a directory and start its server
+tetherctl remove [directory]  # stop its server and remove it
+tetherctl start [directory]
+tetherctl stop [directory]
+```
+
+`directory` defaults to the current directory. Build it with
+`swift build -c release --product tetherctl`; the app must be running.
 
 ## Notes
 
