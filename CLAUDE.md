@@ -37,3 +37,11 @@ toolkit.
 Standard [willsawyerrrr.dev conventions](../../CLAUDE.md) apply: branch per
 feature, one PR per feature, auto-merge once open, Claude owns the git/PR
 lifecycle end to end.
+
+## Releases
+
+Publishing a GitHub release (`gh release create vX.Y.Z`) triggers
+`.github/workflows/homebrew.yml`, which commits the new tarball URL and
+sha256 to `willsawyerrrr/homebrew-tap` so `brew upgrade tether` picks it up
+immediately. It pushes with the `TAP_DEPLOY_KEY` secret, a write deploy key
+scoped to that repo.
