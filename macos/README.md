@@ -13,8 +13,8 @@ Targets macOS 13+.
 brew install willsawyerrrr/tap/tether
 ```
 
-This builds the app from source (Xcode required) and puts `tether` (launches
-the app) and `tetherctl` on your `PATH`. Keep the app running in the
+This builds the app from source (Xcode required) and puts the `tether`
+command on your `PATH`. Keep the app running in the
 background across logins with `brew services start tether`.
 
 ## Structure
@@ -25,14 +25,15 @@ This is a Swift Package Manager package, not an `.xcodeproj`:
 - `Resources/Info.plist` and `scripts/build-app.sh` — assemble `Tether.app`.
 - `Sources/TetherIPC/` — the control-socket protocol and POSIX helpers shared
   by the app and the CLI.
-- `Sources/TetherCLI/` — `tetherctl`, the command-line client.
+- `Sources/TetherCLI/` — the `tether` command-line client (built as `tetherctl`,
+  so it can sit beside the app executable in the bundle).
 - `Sources/Tether/` — app source.
   - `TetherApp.swift` — `MenuBarExtra` scene and app delegate
     (accessory activation policy).
   - `Models/` — `SessionStatus`, `DirectoryRecord`, `ManagedDirectory`.
   - `Services/` — `RemoteControlProcess` (spawns and parses
     `claude remote-control`), `DirectoryStore` (persistence), `AppModel`
-    (app-wide state), `ControlServer` (the control socket `tetherctl` talks to).
+    (app-wide state), `ControlServer` (the control socket `tether` talks to).
   - `Views/` — `MenuBarContentView`, `DirectoryRowView`.
 
 ## Opening and running
@@ -45,23 +46,23 @@ This is a Swift Package Manager package, not an `.xcodeproj`:
 `scripts/build-app.sh [--install] [output-dir] [version]` builds `Tether.app`
 (ad-hoc signed, with `tetherctl` alongside the app in `Contents/MacOS/`) into
 `output-dir` (default `.build/app`). `--install` also copies it to
-`/Applications` and links `tetherctl` into `/usr/local/bin`.
+`/Applications` and links it into `/usr/local/bin` as `tether`.
 
 ## Command line
 
-`tetherctl` controls the running app over a Unix domain socket at
+`tether` controls the running app over a Unix domain socket at
 `~/Library/Application Support/Tether/tether.sock` (owner-only):
 
 ```
-tetherctl add [directory]     # add a directory and start its server
-tetherctl remove [directory]  # stop its server and remove it
-tetherctl start [directory]
-tetherctl stop [directory]
+tether add [directory]        # add a directory and start its server
+tether remove [directory]     # stop its server and remove it
+tether start [directory]
+tether stop [directory]
 ```
 
-`directory` defaults to the current directory. Build it with
-`brew install` or `scripts/build-app.sh --install` (either puts it on your
-`PATH`); the app must be running.
+`directory` defaults to the current directory. `tether` with no arguments
+launches the app. `brew install` or `scripts/build-app.sh --install` puts it on
+your `PATH`; the app must be running for the commands above.
 
 ## Notes
 

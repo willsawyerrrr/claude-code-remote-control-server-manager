@@ -3,7 +3,7 @@
 #
 # Usage: scripts/build-app.sh [--install] [output-dir] [version]
 #
-# `--install` also copies the app to /Applications and links `tetherctl` into
+# `--install` also copies the app to /Applications and links `tether` into
 # /usr/local/bin. Extra `swift build` flags (e.g. `--disable-sandbox`, needed inside
 # Homebrew's build sandbox) are read from `SWIFT_BUILD_FLAGS`.
 set -euo pipefail
@@ -34,6 +34,6 @@ if $install; then
     rm -r /Applications/Tether.app 2>/dev/null || true
     cp -R "$app" /Applications/
     mkdir -p /usr/local/bin
-    ln -sf /Applications/Tether.app/Contents/MacOS/tetherctl /usr/local/bin/tetherctl
-    echo "Installed /Applications/Tether.app and /usr/local/bin/tetherctl"
+    ln -sf /Applications/Tether.app/Contents/MacOS/tetherctl /usr/local/bin/tether
+    echo "Installed /Applications/Tether.app and /usr/local/bin/tether"
 fi
