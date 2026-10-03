@@ -1,17 +1,13 @@
 import Foundation
+import TetherIPC
 
 /// Persists the list of added directories to
 /// `~/Library/Application Support/Tether/directories.json`.
 enum DirectoryStore {
     private static let fileManager = FileManager.default
 
-    private static var supportDirectory: URL {
-        let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("Tether", isDirectory: true)
-    }
-
     private static var fileURL: URL {
-        supportDirectory.appendingPathComponent("directories.json", isDirectory: false)
+        ControlSocket.supportDirectory.appendingPathComponent("directories.json", isDirectory: false)
     }
 
     /// Loads the saved directory list, or an empty list if none has been saved yet
@@ -24,7 +20,7 @@ enum DirectoryStore {
     /// Overwrites the saved directory list, creating the containing directory if needed.
     static func save(_ records: [DirectoryRecord]) {
         do {
-            try fileManager.createDirectory(at: supportDirectory, withIntermediateDirectories: true)
+            try fileManager.createDirectory(at: ControlSocket.supportDirectory, withIntermediateDirectories: true)
             let data = try JSONEncoder().encode(records)
             try data.write(to: fileURL, options: .atomic)
         } catch {

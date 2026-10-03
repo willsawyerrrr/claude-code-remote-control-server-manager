@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import TetherIPC
 
 /// Owns the list of directories the user has added and their `claude remote-control`
 /// servers, and keeps the persisted directory list in sync with changes.
@@ -29,16 +30,61 @@ final class AppModel: ObservableObject {
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
+        add(url)
+    }
+
+    /// Adds and starts the directory at `url`. Returns `nil` if it's already in the list.
+    @discardableResult
+    private func add(_ url: URL) -> ManagedDirectory? {
         let standardizedURL = url.standardizedFileURL
-        guard !directories.contains(where: { $0.path.standardizedFileURL == standardizedURL }) else {
-            return
-        }
+        guard directory(at: standardizedURL) == nil else { return nil }
 
         let directory = ManagedDirectory(path: standardizedURL)
         directories.append(directory)
         observe(directory)
         persist()
         directory.start()
+        return directory
+    }
+
+    private func directory(at url: URL) -> ManagedDirectory? {
+        directories.first { $0.path.standardizedFileURL == url }
+    }
+
+    /// Carries out a `tetherctl` request against the directory list.
+    func handle(_ request: ControlRequest) -> ControlResponse {
+        let url = URL(fileURLWithPath: request.path, isDirectory: true).standardizedFileURL
+        let existing = directory(at: url)
+
+        switch request.command {
+        case .add:
+            var isDirectory: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
+                isDirectory.boolValue
+            else {
+                return ControlResponse(ok: false, message: "\(url.path) is not a directory.")
+            }
+            guard add(url) != nil else {
+                return ControlResponse(ok: true, message: "\(url.path) is already added.")
+            }
+            return ControlResponse(ok: true, message: "Added \(url.path).")
+        case .remove:
+            guard let existing else { return Self.notAdded(url) }
+            remove(existing)
+            return ControlResponse(ok: true, message: "Removed \(url.path).")
+        case .start:
+            guard let existing else { return Self.notAdded(url) }
+            existing.start()
+            return ControlResponse(ok: true, message: "Started \(url.path).")
+        case .stop:
+            guard let existing else { return Self.notAdded(url) }
+            existing.stop()
+            return ControlResponse(ok: true, message: "Stopped \(url.path).")
+        }
+    }
+
+    private static func notAdded(_ url: URL) -> ControlResponse {
+        ControlResponse(ok: false, message: "\(url.path) hasn't been added to Tether.")
     }
 
     /// Stops the directory's server, if running, and removes it from the list.
