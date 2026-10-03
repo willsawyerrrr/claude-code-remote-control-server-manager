@@ -1,4 +1,4 @@
-# Remote Control Manager (macOS)
+# Tether (macOS)
 
 A menu bar app for starting, watching, and stopping `claude remote-control`
 server sessions — one per directory — without keeping a terminal open. No
@@ -12,8 +12,8 @@ Targets macOS 13+.
 This is a Swift Package Manager executable target, not an `.xcodeproj`:
 
 - `Package.swift` — package manifest.
-- `Sources/RemoteControlManager/` — app source.
-  - `RemoteControlManagerApp.swift` — `MenuBarExtra` scene and app delegate
+- `Sources/Tether/` — app source.
+  - `TetherApp.swift` — `MenuBarExtra` scene and app delegate
     (accessory activation policy).
   - `Models/` — `SessionStatus`, `DirectoryRecord`, `ManagedDirectory`.
   - `Services/` — `RemoteControlProcess` (spawns and parses
@@ -23,13 +23,13 @@ This is a Swift Package Manager executable target, not an `.xcodeproj`:
 
 ## Opening and running
 
-- In Xcode: `open Package.swift`, then run the `RemoteControlManager` scheme.
+- In Xcode: `open Package.swift`, then run the `Tether` scheme.
 - From the command line: `swift run` (from this directory).
 
 ## Notes
 
 - The directory list persists across launches at
-  `~/Library/Application Support/RemoteControlManager/directories.json`.
+  `~/Library/Application Support/Tether/directories.json`.
   Quitting the app leaves any running servers running, so they keep fronting
   sessions someone might be connected to. Every launch starts a server for
   each directory in that list, or, for one detected as still running from

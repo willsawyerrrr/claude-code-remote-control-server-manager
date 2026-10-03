@@ -1,4 +1,4 @@
-namespace RemoteControlManager.Models;
+namespace Tether.Models;
 
 /// <summary>
 /// Persisted identity of a directory the user has added, plus the process id of its server the

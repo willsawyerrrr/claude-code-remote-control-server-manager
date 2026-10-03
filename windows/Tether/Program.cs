@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace RemoteControlManager;
+namespace Tether;
 
 internal static class Program
 {

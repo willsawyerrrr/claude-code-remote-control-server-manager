@@ -3,10 +3,10 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using RemoteControlManager.Models;
-using RemoteControlManager.Services;
+using Tether.Models;
+using Tether.Services;
 
-namespace RemoteControlManager;
+namespace Tether;
 
 /// <summary>
 /// Application shell: a tray icon with a context menu listing added directories and their
@@ -39,7 +39,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon = new NotifyIcon
         {
             Icon = SystemIcons.Application,
-            Text = "Remote Control Manager",
+            Text = "Tether",
             ContextMenuStrip = new ContextMenuStrip(),
             Visible = true,
         };

@@ -1,4 +1,4 @@
-namespace RemoteControlManager.Models;
+namespace Tether.Models;
 
 /// <summary>
 /// A directory the user has added, and the state of its <c>claude remote-control</c> session.

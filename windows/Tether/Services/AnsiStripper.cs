@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace RemoteControlManager.Services;
+namespace Tether.Services;
 
 /// <summary>
 /// Strips ANSI escape sequences from text emitted by <c>claude remote-control</c>'s live

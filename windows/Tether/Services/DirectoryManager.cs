@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using RemoteControlManager.Models;
+using Tether.Models;
 
-namespace RemoteControlManager.Services;
+namespace Tether.Services;
 
 /// <summary>
 /// Owns the list of added directories, their persisted state, and the

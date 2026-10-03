@@ -1,4 +1,4 @@
-# Remote Control Manager (Windows)
+# Tether (Windows)
 
 Native Windows system tray app for managing `claude remote-control` server
 sessions, one per directory. Built with WinForms
@@ -14,13 +14,13 @@ main window — everything happens through the tray icon's context menu.
 
 ## Build & run
 
-From `windows/RemoteControlManager/`:
+From `windows/Tether/`:
 
 ```
 dotnet run
 ```
 
-or open the `windows/RemoteControlManager/` folder directly in Visual Studio
+or open the `windows/Tether/` folder directly in Visual Studio
 (File → Open → Folder) and run/debug from there — no `.sln` is needed.
 
 ## Usage
@@ -34,7 +34,7 @@ or open the `windows/RemoteControlManager/` folder directly in Visual Studio
 - **Quit** leaves running servers running.
 
 The directory list persists across restarts at
-`%APPDATA%\RemoteControlManager\directories.json`, along with each running
+`%APPDATA%\Tether\directories.json`, along with each running
 server's process id and join URL. A server still running on the next launch
 keeps its join URL and is not started again; if it hadn't reported one yet,
 it's marked running and can only be stopped. Servers are never auto-started

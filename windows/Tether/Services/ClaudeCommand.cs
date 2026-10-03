@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace RemoteControlManager.Services;
+namespace Tether.Services;
 
 /// <summary>
 /// Resolves how to invoke the <c>claude</c> CLI on this machine: natively on the Windows PATH,

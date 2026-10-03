@@ -25,7 +25,7 @@ final class AppModel: ObservableObject {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.prompt = "Add"
-        panel.message = "Choose a directory to manage with Remote Control Manager."
+        panel.message = "Choose a directory to manage with Tether."
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
 

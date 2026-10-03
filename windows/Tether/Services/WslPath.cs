@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace RemoteControlManager.Services;
+namespace Tether.Services;
 
 /// <summary>Translates a Windows-side directory path into the Linux path WSL sees it as.</summary>
 public static class WslPath
