@@ -7,6 +7,16 @@ UI.
 
 Targets macOS 13+.
 
+## Installing
+
+```
+brew install willsawyerrrr/tap/tether
+```
+
+This builds the app from source (Xcode required) and links `tether` (the app)
+and `tetherctl` onto your `PATH`. Keep the app running in the background
+across logins with `brew services start tether`.
+
 ## Structure
 
 This is a Swift Package Manager package, not an `.xcodeproj`:
@@ -50,8 +60,8 @@ tetherctl stop [directory]
 ```
 
 `directory` defaults to the current directory. Build it with
-`scripts/build-app.sh --install` (which puts it on your `PATH`); the app must
-be running.
+`brew install` or `scripts/build-app.sh --install` (either puts it on your
+`PATH`); the app must be running.
 
 ## Notes
 
