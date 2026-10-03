@@ -18,6 +18,16 @@ when you're done. Each running server shows its status inline.
 Each app is built and run from its own native toolchain (Xcode / Visual
 Studio); see that directory's README for setup.
 
+## Installing
+
+The macOS app is available via Homebrew:
+
+```
+brew install willsawyerrrr/tap/tether
+```
+
+See [`macos/README.md`](macos/README.md#installing) for details.
+
 ## Requirements
 
 - A directory must already have its Claude Code workspace trust dialog
