@@ -3,9 +3,10 @@ import Foundation
 import TetherIPC
 
 let usage = """
-    Usage: tetherctl <add|remove|start|stop> [directory]
+    Usage: tether [<add|remove|start|stop> [directory]]
 
-    Controls the running Tether app. `directory` defaults to the current directory.
+    With no arguments, launches the Tether app. Otherwise controls the running app;
+    `directory` defaults to the current directory.
     """
 
 func fail(_ message: String) -> Never {
@@ -13,7 +14,30 @@ func fail(_ message: String) -> Never {
     exit(1)
 }
 
+/// Opens the `Tether.app` this executable lives in (or, outside a bundle, the one registered with
+/// Launch Services), then exits.
+func launchApp() -> Never {
+    let bundle = Bundle.main.executableURL?.resolvingSymlinksInPath()
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+    process.arguments =
+        bundle?.pathExtension == "app" ? [bundle!.path] : ["-b", "dev.willsawyerrrr.Tether"]
+    do {
+        try process.run()
+        process.waitUntilExit()
+    } catch {
+        fail("Can't launch Tether: \(error)")
+    }
+    exit(process.terminationStatus)
+}
+
 let arguments = CommandLine.arguments.dropFirst()
+
+if arguments.isEmpty {
+    launchApp()
+}
+
 guard let name = arguments.first, let command = ControlCommand(rawValue: name), arguments.count <= 2 else {
     fail(usage)
 }
