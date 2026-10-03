@@ -60,9 +60,9 @@ tether start [directory]
 tether stop [directory]
 ```
 
-`directory` defaults to the current directory. `tether` with no arguments
-launches the app. `brew install` or `scripts/build-app.sh --install` puts it on
-your `PATH`; the app must be running for the commands above.
+`directory` defaults to the current directory. `brew install` or
+`scripts/build-app.sh --install` puts it on your `PATH`; the app must be
+running.
 
 ## Notes
 
