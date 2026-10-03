@@ -3,6 +3,14 @@ name: Homebrew
 on:
   release:
     types: [published]
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+    secrets:
+      TAP_DEPLOY_KEY:
+        required: true
 
 jobs:
   formula:
@@ -14,7 +22,7 @@ jobs:
           ssh-key: ${{ secrets.TAP_DEPLOY_KEY }}
       - name: Point the formula at this release
         env:
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
         run: |
           url="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.tar.gz"
           sha="$(curl -fsSL "$url" | sha256sum | cut -d' ' -f1)"
