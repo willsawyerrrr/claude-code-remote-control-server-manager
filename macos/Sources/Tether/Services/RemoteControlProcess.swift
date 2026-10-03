@@ -13,6 +13,11 @@ final class RemoteControlProcess {
     private static let joinURLPattern = try! NSRegularExpression(
         pattern: "https://claude\\.ai/code\\?environment=[A-Za-z0-9_-]+"
     )
+    // Matches diagnostics the login shell prints while sourcing the user's rc files, e.g.
+    // `(eval):1: can't change option: zle`.
+    private static let shellNoisePattern = try! NSRegularExpression(
+        pattern: "^\\(eval\\):\\d+: .*$\\n?", options: .anchorsMatchLines
+    )
     private static let workspaceNotTrustedMarker = "Workspace not trusted"
 
     /// Diagnostic output is capped to this many characters to bound memory use.
@@ -136,7 +141,7 @@ final class RemoteControlProcess {
             if stripped.contains(Self.workspaceNotTrustedMarker) {
                 self.onStatusChange(.error(message: Self.workspaceNotTrustedLine(in: stripped)))
             } else if finishedProcess.terminationStatus != 0 {
-                let tail = stripped.suffix(500)
+                let tail = Self.removingShellNoise(from: stripped).suffix(500)
                 self.onStatusChange(
                     .error(
                         message: "claude remote-control exited unexpectedly "
@@ -155,6 +160,11 @@ final class RemoteControlProcess {
             .first(where: { $0.contains(workspaceNotTrustedMarker) })
             .map(String.init)
             ?? "Workspace not trusted."
+    }
+
+    private static func removingShellNoise(from text: String) -> String {
+        let range = NSRange(text.startIndex..., in: text)
+        return shellNoisePattern.stringByReplacingMatches(in: text, range: range, withTemplate: "")
     }
 
     private static func stripANSI(_ text: String) -> String {
