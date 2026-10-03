@@ -2,14 +2,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "RemoteControlManager",
+    name: "Tether",
     platforms: [
         .macOS(.v13)
     ],
     targets: [
         .executableTarget(
-            name: "RemoteControlManager",
-            path: "Sources/RemoteControlManager"
+            name: "Tether",
+            path: "Sources/Tether"
         )
     ]
 )

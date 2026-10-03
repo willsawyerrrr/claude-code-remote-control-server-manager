@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using RemoteControlManager.Models;
+using Tether.Models;
 
-namespace RemoteControlManager.Services;
+namespace Tether.Services;
 
 /// <summary>
 /// Persists each added directory's path and last-known server process id as JSON under
-/// <c>%APPDATA%\RemoteControlManager\directories.json</c>.
+/// <c>%APPDATA%\Tether\directories.json</c>.
 /// </summary>
 public sealed class DirectoryStore
 {
     private static readonly string FilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "RemoteControlManager",
+        "Tether",
         "directories.json");
 
     /// <summary>

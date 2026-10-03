@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-namespace RemoteControlManager.Services;
+namespace Tether.Services;
 
 /// <summary>
 /// Wraps a single <c>claude remote-control</c> child process for one directory: starts it,

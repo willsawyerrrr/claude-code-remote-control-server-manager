@@ -1,8 +1,8 @@
-# Remote Control Manager
+# Tether for Claude Code
 
-[![CI](https://github.com/willsawyerrrr/claude-code-remote-control-server-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/willsawyerrrr/claude-code-remote-control-server-manager/actions/workflows/ci.yml)
+[![CI](https://github.com/willsawyerrrr/tether/actions/workflows/ci.yml/badge.svg)](https://github.com/willsawyerrrr/tether/actions/workflows/ci.yml)
 
-Native macOS menu bar and Windows system tray apps for starting, watching, and
+Tether is a pair of native macOS menu bar and Windows system tray apps for starting, watching, and
 stopping [`claude remote-control`](https://claude.ai/code) server sessions —
 one per directory — without keeping a terminal open.
 

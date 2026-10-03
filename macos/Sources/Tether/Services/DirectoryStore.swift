@@ -1,13 +1,13 @@
 import Foundation
 
 /// Persists the list of added directories to
-/// `~/Library/Application Support/RemoteControlManager/directories.json`.
+/// `~/Library/Application Support/Tether/directories.json`.
 enum DirectoryStore {
     private static let fileManager = FileManager.default
 
     private static var supportDirectory: URL {
         let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("RemoteControlManager", isDirectory: true)
+        return base.appendingPathComponent("Tether", isDirectory: true)
     }
 
     private static var fileURL: URL {
@@ -28,7 +28,7 @@ enum DirectoryStore {
             let data = try JSONEncoder().encode(records)
             try data.write(to: fileURL, options: .atomic)
         } catch {
-            NSLog("RemoteControlManager: failed to save directory list: \(error.localizedDescription)")
+            NSLog("Tether: failed to save directory list: \(error.localizedDescription)")
         }
     }
 }

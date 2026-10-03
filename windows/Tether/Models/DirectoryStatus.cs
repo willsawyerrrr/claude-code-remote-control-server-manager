@@ -1,4 +1,4 @@
-namespace RemoteControlManager.Models;
+namespace Tether.Models;
 
 /// <summary>
 /// Lifecycle state of a directory's <c>claude remote-control</c> session.

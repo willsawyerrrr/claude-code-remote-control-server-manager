@@ -3,11 +3,11 @@ import Foundation
 import SwiftUI
 
 @main
-struct RemoteControlManagerApp: App {
+struct TetherApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra("Remote Control Manager", systemImage: "network") {
+        MenuBarExtra("Tether", systemImage: "network") {
             MenuBarContentView()
                 .environmentObject(appDelegate.model)
         }

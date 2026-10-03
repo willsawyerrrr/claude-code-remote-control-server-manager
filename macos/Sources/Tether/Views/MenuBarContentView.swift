@@ -36,7 +36,7 @@ struct MenuBarContentView: View {
 
             Divider()
 
-            Button("Quit Remote Control Manager") {
+            Button("Quit Tether") {
                 NSApplication.shared.terminate(nil)
             }
             .buttonStyle(.plain)
@@ -51,7 +51,7 @@ struct MenuBarContentView: View {
 
     private var header: some View {
         HStack {
-            Text("Remote Control Manager")
+            Text("Tether")
                 .font(.headline)
 
             Spacer()
