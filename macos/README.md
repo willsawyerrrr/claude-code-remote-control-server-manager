@@ -12,6 +12,7 @@ Targets macOS 13+.
 This is a Swift Package Manager package, not an `.xcodeproj`:
 
 - `Package.swift` — package manifest.
+- `Resources/Info.plist` and `scripts/build-app.sh` — assemble `Tether.app`.
 - `Sources/TetherIPC/` — the control-socket protocol and POSIX helpers shared
   by the app and the CLI.
 - `Sources/TetherCLI/` — `tetherctl`, the command-line client.
@@ -29,6 +30,13 @@ This is a Swift Package Manager package, not an `.xcodeproj`:
 - In Xcode: `open Package.swift`, then run the `Tether` scheme.
 - From the command line: `swift run` (from this directory).
 
+## Building the app bundle
+
+`scripts/build-app.sh [--install] [output-dir] [version]` builds `Tether.app`
+(ad-hoc signed, with `tetherctl` alongside the app in `Contents/MacOS/`) into
+`output-dir` (default `.build/app`). `--install` also copies it to
+`/Applications` and links `tetherctl` into `/usr/local/bin`.
+
 ## Command line
 
 `tetherctl` controls the running app over a Unix domain socket at
@@ -42,7 +50,8 @@ tetherctl stop [directory]
 ```
 
 `directory` defaults to the current directory. Build it with
-`swift build -c release --product tetherctl`; the app must be running.
+`scripts/build-app.sh --install` (which puts it on your `PATH`); the app must
+be running.
 
 ## Notes
 
